@@ -1,5 +1,5 @@
 # mini-http-echo-server
-A mini HTTP Echo Server, just for POC.
+A mini HTTP Echo Server, just for education purpose.
 
 ### Compilation
 `mkdir build && cd build && cmake .. && cmake --build .`
@@ -8,4 +8,4 @@ A mini HTTP Echo Server, just for POC.
 `./build/main thread_count=4`
 
 ### Load Test
-`npm i && npm run test`
+`ab -c 50 -n 100 http://127.0.0.1:8080/?num=40`
