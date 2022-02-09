@@ -37,9 +37,10 @@ void* acceptConn(void *arg) {
     const int num = retrieveGETQueryIntValByKey(reqBuf, "num");
     pthread_mutex_unlock(&mutex);
 
-    int fibResult = calFibonacci(num);
+    int fibResult = calcFibonacci(num);
+    // follow the format of the http response.
     sprintf(resBuf, "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\nContent-length: %d\r\n\r\n%d", 
-      calDigits(fibResult), fibResult);
+      calcDigits(fibResult), fibResult);
     write(acceptedSocket, resBuf, strlen(resBuf));
   }
   close(acceptedSocket);

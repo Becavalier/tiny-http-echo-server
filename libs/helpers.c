@@ -5,13 +5,13 @@
 #include "helpers.h"
 #include "structs.h"
 
-int calFibonacci(int n) {
+int calcFibonacci(int n) {
   if (n <= 1)
     return n;
-  return calFibonacci(n - 1) + calFibonacci(n - 2);
+  return calcFibonacci(n - 1) + calcFibonacci(n - 2);
 }
 
-int calDigits(int n) {
+int calcDigits(int n) {
   return (int) floor(log10(abs(n))) + 1;
 }
 

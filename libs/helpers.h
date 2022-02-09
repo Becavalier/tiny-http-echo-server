@@ -3,8 +3,8 @@
 
 #include "structs.h"
 
-int calFibonacci(int);
-int calDigits(int);
+int calcFibonacci(int);
+int calcDigits(int);
 int retrieveGETQueryIntValByKey(char*, const char*);
 void wrapStrFromPTR(char*, size_t, const char*, const char*);
 void setupServerSettings(int, const char**, serverSettings*);

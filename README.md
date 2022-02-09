@@ -1,5 +1,7 @@
-# mini-http-echo-server
-A mini HTTP Echo Server, just for education purpose.
+# tiny-http-echo-server
+A simple HTTP Echo Server, just for educational purposes. 
+
+If you send the HTTP request with a query param named "num" and an integer value N, then the server will respond to you with the Nth value in the standard Fibonacci sequence.
 
 ### Compilation
 ```
