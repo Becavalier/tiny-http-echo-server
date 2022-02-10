@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(mini-http-server)
 
-set(TARGET_FILE "main")
+set(TARGET_FILE "http-echo-server")
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_C_STANDARD 17)
 

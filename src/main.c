@@ -38,7 +38,7 @@ noreturn void* acceptConn(void *arg) {
       perror("In accept");
       pthread_exit(NULL);
     }
-    
+
     // deal with HTTP request.
     char reqBuf[HTTP_REQ_BUF];
     bzero(reqBuf, HTTP_REQ_BUF); 
@@ -97,7 +97,6 @@ int main(int argc, const char* argv[]) {
 
   // main loop.
   while (1) {
-    printf("Thread Created: No.%d\n", threadCounter);
     pthread_mutex_lock(&mutex);
     while (threadCounter >= ss.thread_count)
       pthread_cond_wait(&cond, &mutex);
@@ -108,6 +107,7 @@ int main(int argc, const char* argv[]) {
     acceptParams ap = { serverFd, (sockaddr*) &address, (socklen_t*) &addrLen };
     pthread_create(&thread_id, NULL, acceptConn, &ap);
     atomic_fetch_add(&threadCounter, 1);
+    printf("[Info] Thread Created: No.%d\n", threadCounter);
   }
   return EXIT_SUCCESS;
 }
