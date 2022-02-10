@@ -5,10 +5,23 @@
 #include "helpers.h"
 #include "structs.h"
 
-int calcFibonacci(int n) {
+int __calcFibTCO(int n, int x, int y) {
+  if (n == 0)
+    return x;
+  if (n == 1)
+    return y;
+  return __calcFibTCO(n - 1, y, x + y);
+}
+
+int __calcFibRecursion(int n) {
   if (n <= 1)
     return n;
-  return calcFibonacci(n - 1) + calcFibonacci(n - 2);
+  return __calcFibRecursion(n - 1) + __calcFibRecursion(n - 2);
+}
+
+int calcFibonacci(int n) {
+  // return __calcFibTCO(n, 0, 1);  // TCO version. 
+  return __calcFibRecursion(n);  // recursion version.
 }
 
 int calcDigits(int n) {

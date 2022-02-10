@@ -1,58 +1,68 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdatomic.h>
 #include <pthread.h>
+#include <stdatomic.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdnoreturn.h>
+#include <signal.h>
 #include "libs/helpers.h"
 #include "libs/structs.h"
 #include "libs/macros.h"
 
 // global variables.
-_Atomic int threadCounter = 0;
+int ff = 0;
+atomic_int threadCounter = 0;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
-void* acceptConn(void *arg) {
-  acceptParams* ap = (acceptParams*) arg;
-
-  int acceptedSocket;
-  // extracts a request from the queue.
-  if ((acceptedSocket = accept(ap->serverFd, ap->addr, ap->addrLen)) < 0) {
-    perror("In accept");
-    pthread_exit(NULL);
-  }
-
-  // deal with HTTP request.
-  char reqBuf[HTTP_REQ_BUF];
-  bzero(reqBuf, HTTP_REQ_BUF); 
-  const size_t receivedBytes = read(acceptedSocket, reqBuf, HTTP_REQ_BUF);
-  if (receivedBytes > 0) {
-    char resBuf[HTTP_RES_BUF];
-
-    // retrieve number from query.
-    pthread_mutex_lock(&mutex);
-    const int num = retrieveGETQueryIntValByKey(reqBuf, "num");
-    pthread_mutex_unlock(&mutex);
-
-    int fibResult = calcFibonacci(num);
-    // follow the format of the http response.
-    sprintf(resBuf, "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\nContent-length: %d\r\n\r\n%d", 
-      calcDigits(fibResult), fibResult);
-    write(acceptedSocket, resBuf, strlen(resBuf));
-  }
-  close(acceptedSocket);
-  atomic_fetch_sub(&threadCounter, 1);
+void renewThread(void *arg) {  
+  int* acceptedSocket = (int*) arg;
+  close(*acceptedSocket);
   pthread_mutex_lock(&mutex);
+  threadCounter--;
   pthread_cond_signal(&cond);  // notify main thread.
   pthread_mutex_unlock(&mutex);
-  return NULL;
+} 
+
+noreturn void* acceptConn(void *arg) {
+  acceptParams* ap = (acceptParams*) arg;
+  int acceptedSocket;
+
+  while (1) {
+    pthread_cleanup_push(renewThread, &acceptedSocket);
+    // extracts a request from the queue.
+    if ((acceptedSocket = accept(ap->serverFd, ap->addr, ap->addrLen)) < 0) {
+      perror("In accept");
+      pthread_exit(NULL);
+    }
+    
+    // deal with HTTP request.
+    char reqBuf[HTTP_REQ_BUF];
+    bzero(reqBuf, HTTP_REQ_BUF); 
+    const size_t receivedBytes = read(acceptedSocket, reqBuf, HTTP_REQ_BUF);
+    if (receivedBytes > 0) {
+      char resBuf[HTTP_RES_BUF];
+
+      // retrieve number from query.
+      pthread_mutex_lock(&mutex);
+      const int num = retrieveGETQueryIntValByKey(reqBuf, "num");
+      pthread_mutex_unlock(&mutex);
+
+      int fibResult = calcFibonacci(num);
+      // follow the format of the http response.
+      sprintf(resBuf, "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\nContent-length: %d\r\n\r\n%d", 
+        calcDigits(fibResult), fibResult);
+      write(acceptedSocket, resBuf, strlen(resBuf));
+    }
+    close(acceptedSocket);
+    pthread_cleanup_pop(0);
+  }
 }
 
 int main(int argc, const char* argv[]) {
-#if !defined(__STDC_NO_ATOMICS__)
   // initialize the server setup.
   serverSettings ss = { .thread_count = 4 };
   setupServerSettings(argc, argv, &ss);
@@ -87,7 +97,7 @@ int main(int argc, const char* argv[]) {
 
   // main loop.
   while (1) {
-    printf("Thread Count: %d\n", threadCounter);
+    printf("Thread Created: No.%d\n", threadCounter);
     pthread_mutex_lock(&mutex);
     while (threadCounter >= ss.thread_count)
       pthread_cond_wait(&cond, &mutex);
@@ -99,6 +109,5 @@ int main(int argc, const char* argv[]) {
     pthread_create(&thread_id, NULL, acceptConn, &ap);
     atomic_fetch_add(&threadCounter, 1);
   }
-#endif
   return EXIT_SUCCESS;
 }
