@@ -25,7 +25,7 @@ int calcFibonacci(int n) {
 }
 
 int calcDigits(int n) {
-  return (int) floor(log10(abs(n))) + 1;
+  return n == 0 ? 0 : (int) floor(log10(abs(n))) + 1;
 }
 
 void wrapStrFromPTR(char* str, size_t len, const char* head, const char* tail) {
