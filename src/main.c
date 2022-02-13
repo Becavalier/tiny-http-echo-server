@@ -52,7 +52,7 @@ noreturn void* acceptConn(void *arg) {
 
       int fibResult = calcFibonacci(num);
       // follow the format of the http response.
-      sprintf(resBuf, "HTTP/1.0 200 OK\r\n"
+      sprintf(resBuf, "HTTP/1.1 200 OK\r\n"
                       "Content-type: text/plain\r\n"
                       "Content-length: %d\r\n\r\n%d", calcDigits(fibResult), fibResult);
       write(acceptedSocket, resBuf, strlen(resBuf));
