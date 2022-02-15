@@ -52,9 +52,7 @@ noreturn void* acceptConn(void *arg) {
 
       int fibResult = calcFibonacci(num);
       // follow the format of the http response.
-      sprintf(resBuf, "HTTP/1.1 200 OK\r\n"
-                      "Content-type: text/plain\r\n"
-                      "Content-length: %d\r\n\r\n%d", calcDigits(fibResult), fibResult);
+      sprintf(resBuf, "HTTP/1.1 200 OK\r\n\r\n%d", fibResult);
       write(acceptedSocket, resBuf, strlen(resBuf));
     }
     close(acceptedSocket);
@@ -64,7 +62,7 @@ noreturn void* acceptConn(void *arg) {
 
 int main(int argc, const char* argv[]) {
   // initialize the server setup.
-  serverSettings ss = { .thread_count = 4 };
+  serverSettings ss = { .threadCount = 4 };
   setupServerSettings(argc, argv, &ss);
 
   int serverFd; 
@@ -98,14 +96,14 @@ int main(int argc, const char* argv[]) {
   // main loop.
   while (1) {
     pthread_mutex_lock(&mutex);
-    while (threadCounter >= ss.thread_count)
+    while (threadCounter >= ss.threadCount)
       pthread_cond_wait(&cond, &mutex);
     pthread_mutex_unlock(&mutex);
 
     // create new thread to handle the request.
-    pthread_t thread_id;
+    pthread_t threadId;
     acceptParams ap = { serverFd, (sockaddr*) &address, (socklen_t*) &addrLen };
-    pthread_create(&thread_id, NULL, acceptConn, &ap);
+    pthread_create(&threadId, NULL, acceptConn, &ap);
     atomic_fetch_add(&threadCounter, 1);
     printf("[Info] Thread Created: No.%d\n", threadCounter);
   }

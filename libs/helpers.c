@@ -80,7 +80,7 @@ void setupServerSettings(int argc, const char** argv, serverSettings* ss) {
     for (size_t i = 0; valHead <= valPos; valHead++)
       val[i++] = *valHead;
     if (strcmp(key, "thread_count") == 0) {
-      ss->thread_count = atoi(val);
+      ss->threadCount = atoi(val);
     }
   }
 }
